@@ -1,10 +1,12 @@
 import { useState, type ChangeEvent } from "react";
 import { Field, toAmount } from "../../components/Field.tsx";
-import { buildAmortization, formatDuration, formatINR } from "../../engine/index.ts";
-import { newId, update, useSnapshot } from "../../store/store.ts";
+import { buildAmortization, currencySymbol, formatDuration, formatMoney } from "../../engine/index.ts";
+import { newId, update, useSettings, useSnapshot } from "../../store/store.ts";
 
 export function Loans() {
   const { loans } = useSnapshot();
+  const { currency } = useSettings();
+  const symbol = currencySymbol(currency);
   const [form, setForm] = useState({ name: "", principal: "", annualRate: "", emi: "" });
   const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value });
 
@@ -22,9 +24,9 @@ export function Loans() {
       <h2>Loans and EMIs</h2>
       <div className="row">
         <Field label="Loan name" value={form.name} onChange={set("name")} placeholder="Home loan" />
-        <Field label="Outstanding principal (₹)" type="number" min="0" value={form.principal} onChange={set("principal")} />
+        <Field label={`Outstanding principal (${symbol})`} type="number" min="0" value={form.principal} onChange={set("principal")} />
         <Field label="Interest rate (% per year)" type="number" min="0" step="0.1" value={form.annualRate} onChange={set("annualRate")} />
-        <Field label="Monthly EMI (₹)" type="number" min="0" value={form.emi} onChange={set("emi")} />
+        <Field label={`Monthly EMI (${symbol})`} type="number" min="0" value={form.emi} onChange={set("emi")} />
         <button onClick={add}>Add loan</button>
       </div>
 
@@ -43,7 +45,7 @@ export function Loans() {
               <p className="error">This EMI does not cover the monthly interest, so the loan never gets paid off. Increase the EMI.</p>
             ) : (
               <p>
-                Debt-free in <strong>{formatDuration(rows.length)}</strong>. Total interest <strong>{formatINR(interest)}</strong>.
+                Debt-free in <strong>{formatDuration(rows.length)}</strong>. Total interest <strong>{formatMoney(interest, currency)}</strong>.
               </p>
             )}
             {rows.length > 0 && (
@@ -56,9 +58,9 @@ export function Loans() {
                       {rows.map((r) => (
                         <tr key={r.month}>
                           <td>{r.month}</td>
-                          <td className="num">{formatINR(r.interest)}</td>
-                          <td className="num">{formatINR(r.principal)}</td>
-                          <td className="num">{formatINR(r.balance)}</td>
+                          <td className="num">{formatMoney(r.interest, currency)}</td>
+                          <td className="num">{formatMoney(r.principal, currency)}</td>
+                          <td className="num">{formatMoney(r.balance, currency)}</td>
                         </tr>
                       ))}
                     </tbody>

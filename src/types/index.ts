@@ -1,4 +1,4 @@
-/** All amounts are in INR, per month unless stated otherwise. */
+/** Amounts are plain numbers, per month unless stated otherwise. The display currency is a separate setting. */
 
 export interface Income {
   salary: number;
@@ -41,4 +41,12 @@ export interface Suggestion {
   id: string;
   severity: Severity;
   message: string;
+}
+
+/** Currencies the user can choose to display amounts in. Display only: no conversion. */
+export type CurrencyCode = "INR" | "USD" | "EUR" | "GBP";
+
+/** App preferences. Kept apart from FinancialSnapshot so the engine and future AI features never see them. */
+export interface Settings {
+  currency: CurrencyCode;
 }

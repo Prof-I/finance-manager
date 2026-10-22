@@ -34,7 +34,7 @@ h2 { font-size: 1.05rem; margin: 0 0 .75rem; } h3 { margin: 0; font-size: 1rem; 
 .num { font-variant-numeric: tabular-nums; }
 .row { display: flex; flex-wrap: wrap; gap: .75rem; align-items: end; margin-bottom: .5rem; }
 .field { display: flex; flex-direction: column; gap: .2rem; font-size: .85rem; color: var(--muted); flex: 1 1 150px; }
-input[type=text], input[type=number], input:not([type]) { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: .5rem .6rem; width: 100%; }
+input[type=text], input[type=number], input:not([type]), select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: .5rem .6rem; width: 100%; }
 .check { display: flex; gap: .4rem; align-items: center; font-size: .9rem; padding-bottom: .5rem; }
 button { font: inherit; cursor: pointer; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 6px; padding: .5rem .9rem; }
 button.secondary { background: none; color: var(--ink); border: 1px solid var(--line); }

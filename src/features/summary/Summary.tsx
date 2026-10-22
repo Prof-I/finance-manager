@@ -1,20 +1,22 @@
 import { useEffect, useState } from "react";
 import { advisor } from "../../advisor/index.ts";
 import { DataTools } from "../../components/DataTools.tsx";
-import { formatINR, formatPercent, summarize } from "../../engine/index.ts";
-import { useSnapshot } from "../../store/store.ts";
+import { formatMoney, formatPercent, summarize } from "../../engine/index.ts";
+import { useSettings, useSnapshot } from "../../store/store.ts";
 import type { Suggestion } from "../../types/index.ts";
 
 export function Summary() {
   const snapshot = useSnapshot();
+  const settings = useSettings();
+  const { currency } = settings;
   const b = summarize(snapshot);
   const [advice, setAdvice] = useState<Suggestion[]>([]);
 
   useEffect(() => {
     let live = true;
-    advisor.getAdvice(snapshot).then((a) => live && setAdvice(a));
+    advisor.getAdvice(snapshot, settings).then((a) => live && setAdvice(a));
     return () => { live = false; };
-  }, [snapshot]);
+  }, [snapshot, settings]);
 
   const buckets = [
     { name: "Needs", share: b.needsShare, target: 0.5, note: "Fixed expenses and EMIs" },
@@ -26,9 +28,9 @@ export function Summary() {
     <>
       <section className="panel hero">
         <p className="muted">Left to save each month</p>
-        <p className={`big num ${b.monthlySavings < 0 ? "neg" : ""}`}>{formatINR(b.monthlySavings)}</p>
+        <p className={`big num ${b.monthlySavings < 0 ? "neg" : ""}`}>{formatMoney(b.monthlySavings, currency)}</p>
         <p className="muted">
-          {formatINR(b.totalIncome)} income − {formatINR(b.totalSpending)} expenses and EMIs
+          {formatMoney(b.totalIncome, currency)} income − {formatMoney(b.totalSpending, currency)} expenses and EMIs
         </p>
       </section>
 

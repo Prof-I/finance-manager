@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Field, toAmount } from "../../components/Field.tsx";
-import { formatINR } from "../../engine/index.ts";
-import { newId, update, useSnapshot } from "../../store/store.ts";
+import { currencySymbol, formatMoney } from "../../engine/index.ts";
+import { newId, update, useSettings, useSnapshot } from "../../store/store.ts";
 
 export function Expenses() {
   const { expenses } = useSnapshot();
+  const { currency } = useSettings();
   const [category, setCategory] = useState("");
   const [amount, setAmount] = useState("");
   const [fixed, setFixed] = useState(true);
@@ -23,7 +24,7 @@ export function Expenses() {
       <p className="muted">Enter whole categories such as rent or electricity, not single purchases.</p>
       <div className="row">
         <Field label="Category" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Rent" />
-        <Field label="Amount (₹)" type="number" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        <Field label={`Amount (${currencySymbol(currency)})`} type="number" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} />
         <label className="check">
           <input type="checkbox" checked={fixed} onChange={(e) => setFixed(e.target.checked)} /> Fixed every month
         </label>
@@ -37,7 +38,7 @@ export function Expenses() {
           {expenses.map((e) => (
             <li key={e.id}>
               <span>{e.category} <small>{e.fixed ? "fixed" : "variable"}</small></span>
-              <span className="num">{formatINR(e.amount)}</span>
+              <span className="num">{formatMoney(e.amount, currency)}</span>
               <button className="link" onClick={() => update((s) => ({ ...s, expenses: s.expenses.filter((x) => x.id !== e.id) }))}>
                 Remove
               </button>

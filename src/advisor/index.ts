@@ -1,4 +1,4 @@
-import type { FinancialSnapshot, Suggestion } from "../types/index.ts";
+import type { FinancialSnapshot, Settings, Suggestion } from "../types/index.ts";
 import { rules } from "./rules.ts";
 
 /**
@@ -7,12 +7,12 @@ import { rules } from "./rules.ts";
  * the same interface and be swapped in without touching the UI.
  */
 export interface Advisor {
-  getAdvice(snapshot: FinancialSnapshot): Promise<Suggestion[]>;
+  getAdvice(snapshot: FinancialSnapshot, settings: Settings): Promise<Suggestion[]>;
 }
 
 export const ruleBasedAdvisor: Advisor = {
-  async getAdvice(snapshot) {
-    return rules.flatMap((rule) => rule(snapshot));
+  async getAdvice(snapshot, settings) {
+    return rules.flatMap((rule) => rule(snapshot, settings));
   },
 };
 
