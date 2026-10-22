@@ -1,7 +1,9 @@
 import { useSyncExternalStore } from "react";
-import type { FinancialSnapshot } from "../types/index.ts";
+import { DEFAULT_CURRENCY, isCurrencyCode } from "../engine/format.ts";
+import type { FinancialSnapshot, Settings } from "../types/index.ts";
 
 const KEY = "finance-manager:v1";
+const SETTINGS_KEY = "finance-manager:settings";
 
 export const emptySnapshot: FinancialSnapshot = {
   income: { salary: 0, other: 0 },
@@ -56,6 +58,48 @@ export function useSnapshot(): FinancialSnapshot {
       return () => listeners.delete(cb);
     },
     () => state,
+  );
+}
+
+/* ---- Settings: separate from the snapshot, so export/import and the engine are unaffected ---- */
+
+export const defaultSettings: Settings = { currency: DEFAULT_CURRENCY };
+
+/** Validates unknown JSON from storage. Anything invalid falls back to the default. */
+export function parseSettings(data: unknown): Settings {
+  const d = (data && typeof data === "object" ? data : {}) as Partial<Settings>;
+  return { currency: isCurrencyCode(d.currency) ? d.currency : DEFAULT_CURRENCY };
+}
+
+function loadSettings(): Settings {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    return raw ? parseSettings(JSON.parse(raw)) : defaultSettings;
+  } catch {
+    return defaultSettings;
+  }
+}
+
+let settings = loadSettings();
+
+export function updateSettings(patch: Partial<Settings>): void {
+  settings = parseSettings({ ...settings, ...patch });
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    /* storage full or unavailable: keep working in memory */
+  }
+  listeners.forEach((l) => l());
+}
+
+/** React hook: returns the current settings and re-renders on change. */
+export function useSettings(): Settings {
+  return useSyncExternalStore(
+    (cb) => {
+      listeners.add(cb);
+      return () => listeners.delete(cb);
+    },
+    () => settings,
   );
 }
 

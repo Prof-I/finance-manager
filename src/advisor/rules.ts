@@ -1,13 +1,13 @@
-import type { FinancialSnapshot, Suggestion } from "../types/index.ts";
-import { formatINR, formatPercent, summarize } from "../engine/index.ts";
+import type { FinancialSnapshot, Settings, Suggestion } from "../types/index.ts";
+import { formatMoney, formatPercent, summarize } from "../engine/index.ts";
 
 /** A rule inspects the snapshot and returns zero or more suggestions. */
-export type Rule = (s: FinancialSnapshot) => Suggestion[];
+export type Rule = (s: FinancialSnapshot, settings: Settings) => Suggestion[];
 
-const overspending: Rule = (s) => {
+const overspending: Rule = (s, { currency }) => {
   const b = summarize(s);
   if (b.totalIncome > 0 && b.monthlySavings < 0) {
-    return [{ id: "overspending", severity: "warn", message: `You spend ${formatINR(-b.monthlySavings)} more than you earn each month. Cut variable expenses first.` }];
+    return [{ id: "overspending", severity: "warn", message: `You spend ${formatMoney(-b.monthlySavings, currency)} more than you earn each month. Cut variable expenses first.` }];
   }
   return [];
 };
@@ -28,10 +28,10 @@ const savingsRate: Rule = (s) => {
     : [{ id: "savings-low", severity: "info", message: `You save ${formatPercent(b.savingsShare)} of your income. The 50/30/20 guideline suggests 20%.` }];
 };
 
-const emergencyFund: Rule = (s) => {
+const emergencyFund: Rule = (s, { currency }) => {
   const b = summarize(s);
   if (b.totalSpending === 0) return [];
-  return [{ id: "emergency-fund", severity: "info", message: `Build an emergency fund of about ${formatINR(b.emergencyFundTarget)} (6 months of spending) before investing.` }];
+  return [{ id: "emergency-fund", severity: "info", message: `Build an emergency fund of about ${formatMoney(b.emergencyFundTarget, currency)} (6 months of spending) before investing.` }];
 };
 
 export const rules: Rule[] = [overspending, emiBurden, savingsRate, emergencyFund];
